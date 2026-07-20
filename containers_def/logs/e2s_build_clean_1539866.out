@@ -1,0 +1,27 @@
+Starting job 1539866 on gpu-1-79 on Olivia at Fri Jul 10 15:30:23 CEST 2026
+
+Reading package lists...
+
+Job 1539866 consumed 0.0 billing hours and 0.0 GPU hours from project nn12107k.
+
+Submitted 2026-07-10T15:30:22; waited 0.0 seconds in the queue after becoming eligible to run.
+
+Requested wallclock time: 6.0 hours
+Elapsed wallclock time:   2.1 minutes
+
+Job failed.
+
+Task and CPU statistics:
+ID             CPUs  Tasks  CPU util                Start  Elapsed  Exit status
+1539866           1            0.0 %  2026-07-10T15:30:22  129.0 s  255 (exit status out of range)
+1539866.batch     1      1    94.7 %  2026-07-10T15:30:22  129.0 s  255 (exit status out of range)
+
+Used CPU time:   2.0 CPU minutes
+Unused CPU time: 6.8 CPU seconds
+
+Memory statistics, in GiB:
+ID              Alloc   Usage
+1539866         128.0        
+1539866.batch   128.0    41.0
+
+Job 1539866 completed at Fri Jul 10 15:32:31 CEST 2026

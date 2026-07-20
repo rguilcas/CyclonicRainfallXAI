@@ -1,0 +1,25 @@
+Reading package lists...
+
+Job 1539499 consumed 0.0 billing hours and 0.0 GPU hours from project nn12107k.
+
+Submitted 2026-07-10T13:32:00; waited 1.0 seconds in the queue after becoming eligible to run.
+
+Requested wallclock time: 6.0 hours
+Elapsed wallclock time:   2.4 minutes
+
+Job failed.
+
+Task and CPU statistics:
+ID             CPUs  Tasks  CPU util                Start  Elapsed  Exit status
+1539499           1            0.0 %  2026-07-10T13:32:01  141.0 s  255 (exit status out of range)
+1539499.batch     1      1    90.1 %  2026-07-10T13:32:01  141.0 s  255 (exit status out of range)
+
+Used CPU time:   2.1 CPU minutes
+Unused CPU time: 13.9 CPU seconds
+
+Memory statistics, in GiB:
+ID              Alloc   Usage
+1539499         128.0        
+1539499.batch   128.0    41.0
+
+Job 1539499 completed at Fri Jul 10 13:34:22 CEST 2026

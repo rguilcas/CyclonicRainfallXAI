@@ -1,0 +1,31 @@
+Starting job 1539881 on gpu-1-79 on Olivia at Fri Jul 10 15:39:06 CEST 2026
+
+Reading package lists...
+installing to /root/.local/bin
+  uv
+  uvx
+everything's installed!
+
+Job 1539881 consumed 0.0 billing hours and 1.0 GPU hours from project nn12107k.
+
+Submitted 2026-07-10T15:39:05; waited 0.0 seconds in the queue after becoming eligible to run.
+
+Requested wallclock time: 6.0 hours
+Elapsed wallclock time:   1.0 hours
+
+Job exited normally.
+
+Task and CPU statistics:
+ID             CPUs  Tasks  CPU util                Start  Elapsed  Exit status
+1539881           1            0.0 %  2026-07-10T15:39:05    1.0 h  0
+1539881.batch     1      1    93.1 %  2026-07-10T15:39:05    1.0 h  0
+
+Used CPU time:   57.3 CPU minutes
+Unused CPU time: 4.3 CPU minutes
+
+Memory statistics, in GiB:
+ID              Alloc   Usage
+1539881         128.0        
+1539881.batch   128.0    91.9
+
+Job 1539881 completed at Fri Jul 10 16:40:38 CEST 2026

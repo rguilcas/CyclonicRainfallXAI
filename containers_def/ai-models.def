@@ -1,0 +1,12 @@
+Bootstrap: docker
+From: nvcr.io/nvidia/pytorch:26.04-py3
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    { apt-get update && apt-get install -y --no-install-recommends git; } || true
+
+    set -e
+    export PATH="$HOME/.local/bin:$PATH"
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
+    uv pip install --system --break-system-packages ai-models ai-models-aurora cdsapi

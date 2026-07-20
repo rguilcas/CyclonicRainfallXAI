@@ -1,0 +1,123 @@
+INFO:    User not listed in /etc/subuid, trying root-mapped namespace
+INFO:    fakeroot command not found
+INFO:    Installing some packages may fail
+INFO:    Starting build...
+INFO:    Fetching OCI image...
+INFO:    Extracting OCI image...
+2026/07/13 16:43:38  warn xattr{etc/gshadow} ignoring ENOTSUP on setxattr "user.rootlesscontainers"
+2026/07/13 16:43:38  warn xattr{/tmp/build-temp-3414548973/rootfs/etc/gshadow} destination filesystem does not support xattrs, further warnings will be suppressed
+2026/07/13 16:43:39  warn xattr{var/log/apt/term.log} ignoring ENOTSUP on setxattr "user.rootlesscontainers"
+2026/07/13 16:43:39  warn xattr{/tmp/build-temp-3414548973/rootfs/var/log/apt/term.log} destination filesystem does not support xattrs, further warnings will be suppressed
+2026/07/13 16:43:39  warn xattr{var/log/apt/term.log} ignoring ENOTSUP on setxattr "user.rootlesscontainers"
+2026/07/13 16:43:39  warn xattr{/tmp/build-temp-3414548973/rootfs/var/log/apt/term.log} destination filesystem does not support xattrs, further warnings will be suppressed
+2026/07/13 16:43:39  warn xattr{etc/gshadow} ignoring ENOTSUP on setxattr "user.rootlesscontainers"
+2026/07/13 16:43:39  warn xattr{/tmp/build-temp-3414548973/rootfs/etc/gshadow} destination filesystem does not support xattrs, further warnings will be suppressed
+2026/07/13 16:43:44  warn xattr{usr/share/doc/cuda-runtime-9-0/NVIDIA-CUDA.jpg} ignoring ENOTSUP on setxattr "user.rootlesscontainers"
+2026/07/13 16:43:44  warn xattr{/tmp/build-temp-3414548973/rootfs/usr/share/doc/cuda-runtime-9-0/NVIDIA-CUDA.jpg} destination filesystem does not support xattrs, further warnings will be suppressed
+2026/07/13 16:43:45  warn xattr{var/lib/apt/lists/auxfiles} ignoring ENOTSUP on setxattr "user.rootlesscontainers"
+2026/07/13 16:43:45  warn xattr{/tmp/build-temp-3414548973/rootfs/var/lib/apt/lists/auxfiles} destination filesystem does not support xattrs, further warnings will be suppressed
+2026/07/13 16:43:45  warn xattr{etc/gshadow} ignoring ENOTSUP on setxattr "user.rootlesscontainers"
+2026/07/13 16:43:45  warn xattr{/tmp/build-temp-3414548973/rootfs/etc/gshadow} destination filesystem does not support xattrs, further warnings will be suppressed
+2026/07/13 16:44:28  warn xattr{var/log/apt/term.log} ignoring ENOTSUP on setxattr "user.rootlesscontainers"
+2026/07/13 16:44:28  warn xattr{/tmp/build-temp-3414548973/rootfs/var/log/apt/term.log} destination filesystem does not support xattrs, further warnings will be suppressed
+2026/07/13 16:44:37  warn xattr{var/log/apt/term.log} ignoring ENOTSUP on setxattr "user.rootlesscontainers"
+2026/07/13 16:44:37  warn xattr{/tmp/build-temp-3414548973/rootfs/var/log/apt/term.log} destination filesystem does not support xattrs, further warnings will be suppressed
+INFO:    Inserting Apptainer configuration...
+INFO:    Running post scriptlet
++ export DEBIAN_FRONTEND=noninteractive
++ apt-get update
+E: setgroups 65534 failed - setgroups (1: Operation not permitted)
+E: setegid 65534 failed - setegid (22: Invalid argument)
+E: seteuid 42 failed - seteuid (22: Invalid argument)
+E: setgroups 0 failed - setgroups (1: Operation not permitted)
+W: chown to _apt:root of directory /var/lib/apt/lists/partial failed - SetupAPTPartialDirectory (22: Invalid argument)
+W: chown to _apt:root of directory /var/lib/apt/lists/auxfiles failed - SetupAPTPartialDirectory (22: Invalid argument)
+E: setgroups 65534 failed - setgroups (1: Operation not permitted)
+E: setegid 65534 failed - setegid (22: Invalid argument)
+E: seteuid 42 failed - seteuid (22: Invalid argument)
+E: setgroups 0 failed - setgroups (1: Operation not permitted)
+E: Method gave invalid 400 URI Failure message: Failed to setgroups - setgroups (1: Operation not permitted)
+E: Method http has died unexpectedly!
+E: Sub-process http returned an error code (112)
++ true
++ set -e
++ export PATH=/root/.local/bin:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/mpi/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/amazon/efa/bin:/opt/tensorrt/bin
++ sh
++ curl -LsSf https://astral.sh/uv/install.sh
+downloading uv 0.11.28 aarch64-unknown-linux-gnu
++ export PATH=/root/.local/bin:/root/.local/bin:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/mpi/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/amazon/efa/bin:/opt/tensorrt/bin
++ uv pip install --system --break-system-packages ai-models ai-models-aurora cdsapi
+Using Python 3.12.3 environment at: /usr
+Resolved 95 packages in 1.39s
+   Building gputil==1.4.0
+Downloading pygments (1.2MiB)
+Downloading cftime (1.5MiB)
+Downloading timm (2.5MiB)
+Downloading cryptography (4.5MiB)
+Downloading dask (1.4MiB)
+Downloading xarray (1.4MiB)
+Downloading numpy (13.3MiB)
+Downloading netcdf4 (9.8MiB)
+Downloading eckitlib (6.7MiB)
+Downloading eccodeslib (8.7MiB)
+      Built gputil==1.4.0
+ Downloaded dask
+ Downloaded pygments
+ Downloaded cftime
+ Downloaded xarray
+ Downloaded timm
+ Downloaded cryptography
+ Downloaded numpy
+ Downloaded netcdf4
+ Downloaded eccodeslib
+ Downloaded eckitlib
+Prepared 44 packages in 1.38s
+Uninstalled 1 package in 19ms
+Installed 44 packages in 71ms
+ + ai-models==0.7.4
+ + ai-models-aurora==0.0.5
+ + array-api-compat==1.15.0
+ + azure-core==1.41.0
+ + azure-storage-blob==12.30.0
+ + cdsapi==0.7.7
+ + cfgrib==0.9.15.1
+ + cftime==1.6.5
+ + cloudpickle==3.1.2
+ + cryptography==49.0.0
+ + dask==2026.7.0
+ + deprecation==2.1.0
+ + earthkit-data==1.0.2
+ + earthkit-meteo==1.0.0
+ + earthkit-regrid==0.5.1
+ + earthkit-utils==1.0.2
+ + eccodes==2.47.0
+ + eccodeslib==2.47.3.21
+ + eckit==2.1.0.21
+ + eckitlib==2.1.0.21
+ + ecmwf-api-client==1.7.0
+ + ecmwf-datastores-client==0.5.1
+ + ecmwf-opendata==0.3.30
+ + entrypoints==0.4
+ + findlibs==0.1.2
+ + flexcache==0.3
+ + flexparser==0.4
+ + gputil==1.4.0
+ + isodate==0.7.2
+ + locket==1.0.0
+ + lru-dict==1.4.1
+ + microsoft-aurora==2.0.0
+ + multiurl==0.3.9
+ + netcdf4==1.7.4
+ - numpy==2.1.0
+ + numpy==1.26.4
+ + partd==1.4.2
+ + pdbufr==0.14.2
+ + pint==0.25.3
+ + pygments==2.20.0
+ + pytz==2026.2
+ + pyyaml==6.0.3
+ + timm==1.0.28
+ + toolz==1.1.0
+ + xarray==2026.7.0
+INFO:    Creating SIF file...
+INFO:    Build complete: /cluster/projects/nn12107k/robin/apptainer/ai-models.sif

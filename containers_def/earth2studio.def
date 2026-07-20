@@ -1,0 +1,60 @@
+Bootstrap: docker
+From: nvcr.io/nvidia/pytorch:26.04-py3
+
+%environment
+    export PATH=/root/.local/bin:$PATH
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    { apt-get update && apt-get install -y --no-install-recommends git cmake build-essential; } || true
+
+    set -e
+    export PATH="$HOME/.local/bin:$PATH"
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    uv pip install --system --break-system-packages \
+        "earth2studio[dlwp,fcn,precip-afno,precip-afno-v2,data]@git+https://github.com/NVIDIA/earth2studio.git@0.16.0"
+
+    uv pip install --system --break-system-packages captum zennit cartopy matplotlib
+
+    # Bake the aiohttp trust_env fix in globally, so it no longer needs to be
+    # pasted at the top of every script by hand. Python auto-imports
+    # sitecustomize.py on startup if present on the path.
+    cat > /usr/local/lib/python3.12/dist-packages/sitecustomize.py << 'EOF'
+try:
+    import aiohttp
+    _orig_init = aiohttp.ClientSession.__init__
+    def _patched_init(self, *args, **kwargs):
+        kwargs.setdefault("trust_env", True)
+        _orig_init(self, *args, **kwargs)
+    aiohttp.ClientSession.__init__ = _patched_init
+except ImportError:
+    pass
+EOF
+
+    set +e
+
+    # --- Slow / fragile installs: warn and continue rather than abort ---
+    export MAX_JOBS=16
+
+    if ! uv pip install -v --system --break-system-packages --no-build-isolation \
+        "torch-harmonics @ git+https://github.com/NVIDIA/torch-harmonics.git@a632ca748a12bd9f74dbc1e00653317810991f74"; then
+        echo "WARNING: torch-harmonics failed to build - install later via overlay if needed"
+    fi
+
+    if ! uv pip install --system --break-system-packages \
+        "makani @ git+https://github.com/NVIDIA/makani.git@b38fcb2799d7dbc146fa60459f3f9823394a8bf1"; then
+        echo "WARNING: makani failed to install - install later via overlay if needed"
+    fi
+
+    if ! uv pip install --system --break-system-packages "earth2studio[sfno]"; then
+        echo "WARNING: earth2studio[sfno] failed - install later via overlay if needed"
+    fi
+
+    if ! uv pip install -v --system --break-system-packages --no-build-isolation "earth2studio[aifs]"; then
+        echo "WARNING: earth2studio[aifs] (flash-attn) failed - install later via overlay if needed"
+    fi
+
+%runscript
+    exec "$@"
