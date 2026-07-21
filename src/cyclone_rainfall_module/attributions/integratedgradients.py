@@ -15,6 +15,7 @@ from earth2studio.models.px import AIFS
 import torch
 import numpy as np
 import pandas as pd
+from ..helpers.region_mask import load_region_mask
 
 def get_IG_attribution(model, 
                        init_dt, target_day,
@@ -57,15 +58,13 @@ def get_IG_attribution(model,
 
         coords = OrderedDict([("batch", np.array([0]))] + list(coords.items()))
 
-        lat_bounds = (58.5, 63.0)
-        lon_bounds = (4.5, 9.0)
-
         model_native_lat = model.latitudes.detach().flatten().cpu().numpy()
         model_native_lon = model.longitudes.detach().flatten().cpu().numpy()
-        native_node_mask = np.where(
-            (model_native_lat >= lat_bounds[0]) & (model_native_lat <= lat_bounds[1]) &
-            (model_native_lon >= lon_bounds[0]) & (model_native_lon <= lon_bounds[1])
-        )[0]
+
+        native_node_mask = load_region_mask(
+            "/cluster/home/rguilcas/code/CyclonicRainfall/CyclonicRainfallXAI/aux/rainfall_regions.geojson", "West Norway", model_native_lat, model_native_lon
+        )
+        print(f"West Norway native node mask: {len(native_node_mask)} nodes selected out of {len(model_native_lat)} total nodes")
         tp_full_idx = model.VARIABLES.index("tp06")
 
         for ctx_cls in (torch.no_grad, torch.inference_mode):

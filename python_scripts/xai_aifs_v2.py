@@ -33,7 +33,7 @@ fix_aiohttp()  # Patch aiohttp to trust environment variables for proxy settings
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # target_day = '2016-08-08'
-# max_lead_time_hours = 48
+# max_lead_time_hours = 6
 
 
 
