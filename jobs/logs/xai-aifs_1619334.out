@@ -1,4 +1,0 @@
-Starting job 1619334 on gpu-1-111 on Olivia at Mon Jul 20 16:17:46 CEST 2026
-
-Init: 2005-09-11 00:00:00 -> target valid time 2005-09-14 06:00:00 (13 steps, target_step=12)
-No climatology for 7 vars, using sample spatial mean: ['d2m', 'skt', 'tcw', 'swvl1', 'swvl2', 'stl1', 'stl2']

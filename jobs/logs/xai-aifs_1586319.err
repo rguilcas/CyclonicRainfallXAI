@@ -1,201 +1,0 @@
-INFO:    gocryptfs not found, will not be able to use gocryptfs
-/usr/bin/rm: cannot remove '/usr/local/cuda/compat/lib': Read-only file system
-rm: cannot remove '/usr/local/cuda/compat/lib': Read-only file system
-/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
-  import pynvml  # type: ignore[import]
-Warp CUDA error 100: no CUDA-capable device is detected (in function init_cuda_driver, /builds/omniverse/warp/warp/native/cuda_util.cpp:319)
-Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:06,  2.63it/s]Fetching ARCO data:  17%|█▋        | 3/18 [00:00<00:02,  6.34it/s]Fetching ARCO data:  72%|███████▏  | 13/18 [00:03<00:01,  3.30it/s]Fetching ARCO data:  78%|███████▊  | 14/18 [00:04<00:01,  3.35it/s]Fetching ARCO data:  83%|████████▎ | 15/18 [00:04<00:00,  3.64it/s]Fetching ARCO data:  89%|████████▉ | 16/18 [00:04<00:00,  3.25it/s]Fetching ARCO data:  94%|█████████▍| 17/18 [00:04<00:00,  3.38it/s]Fetching ARCO data: 100%|██████████| 18/18 [00:05<00:00,  3.46it/s]Fetching ARCO data: 100%|██████████| 18/18 [00:05<00:00,  3.45it/s]
-Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]                                                          Fetching ARCO data:   0%|          | 0/18 [00:00<?, ?it/s]Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]                                                                  Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]                                                                  Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]                                                                  Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]                                                                  Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]                                                                  Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]                                                                  Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]                                                                  Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]                                                                  Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]                                                                  Fetching ARCO data:   6%|▌         | 1/18 [00:00<00:04,  4.11it/s]Fetching ARCO data:  44%|████▍     | 8/18 [00:00<00:00, 14.36it/s]Fetching ARCO data:  72%|███████▏  | 13/18 [00:03<00:01,  3.37it/s]Fetching ARCO data:  78%|███████▊  | 14/18 [00:04<00:01,  2.69it/s]Fetching ARCO data:  83%|████████▎ | 15/18 [00:04<00:01,  2.88it/s]Fetching ARCO data:  89%|████████▉ | 16/18 [00:05<00:00,  2.41it/s]Fetching ARCO data:  94%|█████████▍| 17/18 [00:05<00:00,  2.26it/s]Fetching ARCO data: 100%|██████████| 18/18 [00:05<00:00,  2.58it/s]Fetching ARCO data: 100%|██████████| 18/18 [00:05<00:00,  3.04it/s]
-Traceback (most recent call last):
-  File "/cluster/home/rguilcas/code/CyclonicRainfall/earth2studio/python_scripts/XAI_aifs_nt.py", line 211, in <module>
-    run_ig_aifs(init_dt, target_dt=target_dt)
-  File "/cluster/home/rguilcas/code/CyclonicRainfall/earth2studio/python_scripts/XAI_aifs_nt.py", line 149, in run_ig_aifs
-    attr = nt.attribute(
-           ^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/captum/log/dummy_log.py", line 54, in wrapper
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/captum/attr/_core/noise_tunnel.py", line 217, in attribute
-    ) = self._compute_partial_attribution(
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/captum/attr/_core/noise_tunnel.py", line 397, in _compute_partial_attribution
-    attributions = attr_func.__wrapped__(  # type: ignore
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/captum/attr/_core/integrated_gradients.py", line 273, in attribute
-    attributions = _batch_attribution(
-                   ^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/captum/attr/_utils/batching.py", line 86, in _batch_attribution
-    current_attr = attr_method._attribute(
-                   ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/captum/attr/_core/integrated_gradients.py", line 366, in _attribute
-    grads = self.gradient_func(
-            ^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/captum/_utils/gradient.py", line 128, in compute_gradients
-    outputs = _run_forward(forward_fn, inputs, target_ind, additional_forward_args)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/captum/_utils/common.py", line 599, in _run_forward
-    output = forward_func(
-             ^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cluster/home/rguilcas/code/CyclonicRainfall/earth2studio/python_scripts/XAI_aifs_nt.py", line 115, in forward
-    out = checkpoint(_step, x_native, use_reentrant=False)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/_compile.py", line 54, in inner
-    return disable_fn(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py", line 1256, in _fn
-    return fn(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/utils/checkpoint.py", line 516, in checkpoint
-    ret = function(*args, **kwargs)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cluster/home/rguilcas/code/CyclonicRainfall/earth2studio/python_scripts/XAI_aifs_nt.py", line 112, in _step
-    out, coords_out = m._forward(x_in, coords_t, step=step)
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/earth2studio/models/px/aifs.py", line 831, in _forward
-    y = self.model.predict_step(x, fcstep=step)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/anemoi/models/interface/__init__.py", line 129, in predict_step
-    y_hat = self(x, model_comm_group=model_comm_group, **kwargs)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/anemoi/models/models/encoder_processor_decoder.py", line 298, in forward
-    x_latent_proc = self.processor(
-                    ^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/anemoi/models/layers/processor.py", line 183, in forward
-    (x,) = self.run_layers((x,), shape_nodes, batch_size, model_comm_group, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/anemoi/models/layers/processor.py", line 77, in run_layers
-    data = checkpoint(layer, *data, *args, **kwargs, use_reentrant=False)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/_compile.py", line 54, in inner
-    return disable_fn(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/_dynamo/eval_frame.py", line 1256, in _fn
-    return fn(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/utils/checkpoint.py", line 516, in checkpoint
-    ret = function(*args, **kwargs)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/anemoi/models/layers/chunk.py", line 147, in forward
-    x = self.blocks[i](x, shapes, batch_size, model_comm_group=model_comm_group, **kwargs)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/anemoi/models/layers/block.py", line 119, in forward
-    x = x + self.attention(
-            ^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/anemoi/models/layers/attention.py", line 165, in forward
-    out = self.attention(
-          ^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/anemoi/models/layers/attention.py", line 278, in forward
-    out = self.attention(
-          ^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/flash_attn/flash_attn_interface.py", line 1201, in flash_attn_func
-    return FlashAttnFunc.apply(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/autograd/function.py", line 596, in apply
-    return super().apply(*args, **kwargs)  # type: ignore[misc]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/flash_attn/flash_attn_interface.py", line 839, in forward
-    out_padded, softmax_lse, S_dmask, rng_state = _wrapped_flash_attn_forward(
-                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/_ops.py", line 1275, in __call__
-    return self._op(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/_library/autograd.py", line 112, in autograd_impl
-    result = forward_no_grad(*args, Metadata(keyset, keyword_only_args))
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/_library/autograd.py", line 41, in forward_no_grad
-    result = op.redispatch(keyset & _C._after_autograd_keyset, *args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/dist-packages/torch/_ops.py", line 878, in redispatch
-    return self._handle.redispatch_boxed(keyset, *args, **kwargs)  # type: ignore[return-value]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-NotImplementedError: Could not run 'flash_attn::_flash_attn_forward' with arguments from the 'CPU' backend. This could be because the operator doesn't exist for this backend, or was omitted during the selective/custom build process (if using custom build). If you are a Facebook employee using PyTorch on mobile, please visit https://fburl.com/ptmfixes for possible resolutions. 'flash_attn::_flash_attn_forward' is only available for these backends: [CUDA, Meta, BackendSelect, Python, FuncTorchDynamicLayerBackMode, Functionalize, Named, Conjugate, Negative, ZeroTensor, ADInplaceOrView, AutogradOther, AutogradCPU, AutogradCUDA, AutogradHIP, AutogradXLA, AutogradMPS, AutogradIPU, AutogradXPU, AutogradHPU, AutogradVE, AutogradLazy, AutogradMTIA, AutogradMAIA, AutogradPrivateUse1, AutogradPrivateUse2, AutogradPrivateUse3, AutogradMeta, AutogradNestedTensor, Tracer, AutocastCPU, AutocastMTIA, AutocastMAIA, AutocastXPU, AutocastMPS, AutocastCUDA, FuncTorchBatched, BatchedNestedTensor, FuncTorchVmapMode, Batched, VmapMode, FuncTorchGradWrapper, PythonTLSSnapshot, FuncTorchDynamicLayerFrontMode, PreDispatch, PythonDispatcher].
-
-CUDA: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [kernel]
-Meta: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [kernel]
-BackendSelect: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/core/BackendSelectFallbackKernel.cpp:3 [backend fallback]
-Python: registered at /opt/pytorch/pytorch/aten/src/ATen/core/PythonFallbackKernel.cpp:198 [backend fallback]
-FuncTorchDynamicLayerBackMode: registered at /opt/pytorch/pytorch/aten/src/ATen/functorch/DynamicLayer.cpp:477 [backend fallback]
-Functionalize: registered at /opt/pytorch/pytorch/aten/src/ATen/FunctionalizeFallbackKernel.cpp:384 [backend fallback]
-Named: registered at /opt/pytorch/pytorch/aten/src/ATen/core/NamedRegistrations.cpp:5 [backend fallback]
-Conjugate: registered at /opt/pytorch/pytorch/aten/src/ATen/ConjugateFallback.cpp:17 [backend fallback]
-Negative: registered at /opt/pytorch/pytorch/aten/src/ATen/native/NegateFallback.cpp:18 [backend fallback]
-ZeroTensor: registered at /opt/pytorch/pytorch/aten/src/ATen/ZeroTensorFallback.cpp:115 [backend fallback]
-ADInplaceOrView: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/core/VariableFallbackKernel.cpp:103 [backend fallback]
-AutogradOther: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradCPU: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradCUDA: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradHIP: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradXLA: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradMPS: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradIPU: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradXPU: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradHPU: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradVE: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradLazy: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradMTIA: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradMAIA: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradPrivateUse1: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradPrivateUse2: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradPrivateUse3: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradMeta: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-AutogradNestedTensor: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:970 [autograd kernel]
-Tracer: registered at /opt/pytorch/pytorch/torch/csrc/autograd/TraceTypeManual.cpp:296 [backend fallback]
-AutocastCPU: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/autocast_mode.cpp:336 [backend fallback]
-AutocastMTIA: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/autocast_mode.cpp:480 [backend fallback]
-AutocastMAIA: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/autocast_mode.cpp:518 [backend fallback]
-AutocastXPU: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/autocast_mode.cpp:556 [backend fallback]
-AutocastMPS: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/autocast_mode.cpp:221 [backend fallback]
-AutocastCUDA: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/autocast_mode.cpp:177 [backend fallback]
-FuncTorchBatched: registered at /opt/pytorch/pytorch/aten/src/ATen/functorch/LegacyBatchingRegistrations.cpp:727 [backend fallback]
-BatchedNestedTensor: registered at /opt/pytorch/pytorch/aten/src/ATen/functorch/LegacyBatchingRegistrations.cpp:754 [backend fallback]
-FuncTorchVmapMode: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/functorch/VmapModeRegistrations.cpp:22 [backend fallback]
-Batched: registered at /opt/pytorch/pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1072 [backend fallback]
-VmapMode: fallthrough registered at /opt/pytorch/pytorch/aten/src/ATen/VmapModeRegistrations.cpp:32 [backend fallback]
-FuncTorchGradWrapper: registered at /opt/pytorch/pytorch/aten/src/ATen/functorch/TensorWrapper.cpp:210 [backend fallback]
-PythonTLSSnapshot: registered at /opt/pytorch/pytorch/aten/src/ATen/core/PythonFallbackKernel.cpp:206 [backend fallback]
-FuncTorchDynamicLayerFrontMode: registered at /opt/pytorch/pytorch/aten/src/ATen/functorch/DynamicLayer.cpp:473 [backend fallback]
-PreDispatch: registered at /opt/pytorch/pytorch/aten/src/ATen/core/PythonFallbackKernel.cpp:210 [backend fallback]
-PythonDispatcher: registered at /opt/pytorch/pytorch/aten/src/ATen/core/PythonFallbackKernel.cpp:202 [backend fallback]
-
