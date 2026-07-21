@@ -19,8 +19,12 @@ from earth2studio.data.utils import fetch_data
 from earth2studio.models.px import AIFS, GraphCastSmall
 
 import sys
+sys.path.append('/cluster/home/rguilcas/code/CyclonicRainfall/CyclonicRainfallXAI/cylone-rainfall-module')
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from cyclone_rainfall_module.src.helpers.aiohttpfix import fix_aiohttp
+
+fix_aiohttp()  # Patch aiohttp to trust environment variables for proxy settings
+
 # def build_climatology_baseline(model, init_dt, device, x_actual, coords_actual):
 #     ic = model.input_coords()
 #     all_vars = list(ic["variable"])
