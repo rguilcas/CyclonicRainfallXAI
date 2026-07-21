@@ -14,6 +14,7 @@ from earth2studio.data.utils import fetch_data
 from earth2studio.models.px import AIFS
 import torch
 import numpy as np
+import pandas as pd
 
 def get_IG_attribution(model, 
                        init_dt, target_day,
@@ -89,6 +90,9 @@ def get_IG_attribution(model,
         node_lon = model.longitudes.detach().flatten().cpu().numpy()
         var_names = [model.VARIABLES[i] for i in model.input_full_ids.cpu().numpy()]
 
+        prediction = wrapper(x_native0).detach().cpu().numpy().squeeze(0)[-1]  # (nsteps, 1)
+        baseline_prediction = wrapper(baseline_native).detach().cpu().numpy().squeeze(0)[-1]  # (nsteps, 1)
+
         ds = xr.Dataset(
             {"attribution": (["input_lead_time", "node", "variable"], attr_stack)},
             coords={
@@ -103,12 +107,20 @@ def get_IG_attribution(model,
                                 "precipitation w.r.t. native-grid initial conditions",
                 "target_region": "Vestlandet, Norway",
                 "init_time": init_dt.isoformat(),
-                "target_day": target_dt.date(),
+                "target_day": target_dt.date().isoformat(),
                 "forecast_lead_hours": (nsteps-3) * 6,
             },
         )
+        ds['prediction'] = prediction
+        ds['baseline_prediction'] = baseline_prediction
+
         return ds
 
     finally:
-        shutil.rmtree(tmp_data_cache, ignore_errors=True)
-        print(f"Cleaned up temporary input data cache: {tmp_data_cache}")
+        def _log_rmtree_error(func, path, exc_info):
+            print(f"WARNING: failed to remove {path}: {exc_info[1]}")
+        shutil.rmtree(tmp_data_cache, onerror=_log_rmtree_error)
+        if os.path.exists(tmp_data_cache):
+            print(f"WARNING: {tmp_data_cache} still exists after cleanup attempt")
+        else:
+            print(f"Cleaned up temporary input data cache: {tmp_data_cache}")
