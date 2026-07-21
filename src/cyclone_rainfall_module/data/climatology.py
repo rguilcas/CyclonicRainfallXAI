@@ -1,6 +1,9 @@
 from earth2studio.data import WB2Climatology
 from earth2studio.data.utils import fetch_data
 from earth2studio.lexicon.wb2 import WB2ClimatetologyLexicon
+import torch
+from collections import OrderedDict
+import numpy as np
 
 def build_climatology_baseline(model, init_dt, device, x_actual, coords_actual):
     ic = model.input_coords()

@@ -19,7 +19,7 @@ from earth2studio.data.utils import fetch_data
 from earth2studio.models.px import AIFS, GraphCastSmall
 
 import sys
-sys.path.append('/cluster/home/rguilcas/code/CyclonicRainfall/CyclonicRainfallXAI/cylone-rainfall-module')
+sys.path.append('/cluster/home/rguilcas/code/CyclonicRainfall/CyclonicRainfallXAI/src')
 
 from cyclone_rainfall_module.src.helpers.aiohttpfix import fix_aiohttp
 

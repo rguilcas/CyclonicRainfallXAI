@@ -1,0 +1,114 @@
+from ..data.climatology import build_climatology_baseline
+from ..models.wrappers import AIFSPrecipRegionWrapperNativeAllPredictions, build_day_groups
+from datetime import datetime, timedelta
+import tempfile
+from earth2studio.data.utils import fetch_data
+from collections import OrderedDict
+import xarray as xr
+from torch.utils.checkpoint import checkpoint
+import os
+import shutil
+from captum.attr import IntegratedGradients
+from earth2studio.data import ARCO
+from earth2studio.data.utils import fetch_data
+from earth2studio.models.px import AIFS
+import torch
+import numpy as np
+
+def get_IG_attribution(model, 
+                       init_dt, target_day,
+                       data, device, ic):
+
+    tmp_data_cache = tempfile.mkdtemp(prefix="e2s_data_cache_", dir="/cluster/projects/nn12107k/robin")
+    os.environ["EARTH2STUDIO_DATA_CACHE"] = tmp_data_cache
+
+    target_dt = datetime.strptime(target_day, '%Y-%m-%d') + timedelta(hours=18)  # 2016-08-08 18:00 UTC
+    if init_dt.date() >= target_dt.date():
+        raise ValueError(f"init_dt must be at the latest {(target_dt-timedelta(hours=24)).strftime('%Y-%m-%dT%H')} with target_day {target_day}")
+    lead_hours_total = (target_dt - init_dt).total_seconds() / 3600
+    if lead_hours_total <= 0 or lead_hours_total % 6 != 0:
+        raise ValueError(
+            f"target_dt {target_dt} is not reachable from init_dt {init_dt} "
+            f"in whole 6h steps (got {lead_hours_total}h)."
+        )
+    nsteps = int(lead_hours_total // 6)
+    target_step = nsteps - 1  # 0-indexed: the final rollout step IS the target
+    day_groups = build_day_groups(init_dt, nsteps, boundary_hour=0)  # or 6 for the hydrological day
+    lat_day_indices = day_groups[-1]
+    print(f"Target day: {target_day}\n    Init: {init_dt} -> target prediction timesteps: [{'-'.join(str(i) for i in lat_day_indices)}]")
+    # print(f"Init: {init_dt} -> target valid time {target_dt} ({nsteps} steps, target_step={target_step})")
+
+    try:
+        x, coords = fetch_data(
+            source=data,
+            time=[init_dt],
+            variable=ic["variable"],
+            lead_time=ic["lead_time"],
+            device=device,
+        )
+        x_clim, coords_clim = build_climatology_baseline(model, init_dt, device, x, coords)
+
+        x = x.unsqueeze(0)
+
+        with torch.no_grad():
+            x_native0 = model._prepare_input(x, coords)
+            baseline_native = model._prepare_input(x_clim, coords_clim)  # x_clim already has batch dim (added inside the function)
+
+        coords = OrderedDict([("batch", np.array([0]))] + list(coords.items()))
+
+        lat_bounds = (58.5, 63.0)
+        lon_bounds = (4.5, 9.0)
+
+        model_native_lat = model.latitudes.detach().flatten().cpu().numpy()
+        model_native_lon = model.longitudes.detach().flatten().cpu().numpy()
+        native_node_mask = np.where(
+            (model_native_lat >= lat_bounds[0]) & (model_native_lat <= lat_bounds[1]) &
+            (model_native_lon >= lon_bounds[0]) & (model_native_lon <= lon_bounds[1])
+        )[0]
+        tp_full_idx = model.VARIABLES.index("tp06")
+
+        for ctx_cls in (torch.no_grad, torch.inference_mode):
+            ctx_cls.__enter__ = lambda self: None
+            ctx_cls.__exit__ = lambda self, *args: None
+        
+        wrapper = AIFSPrecipRegionWrapperNativeAllPredictions(model, coords, nsteps, native_node_mask, tp_full_idx, day_groups=day_groups).to(device).eval()
+        ig = IntegratedGradients(wrapper)
+
+
+        x_ig = x_native0.clone().requires_grad_(True)
+        target_day = len(day_groups) - 1  # last day group is the target step for attribution
+        print("  Computing Integrated Gradients attribution...")
+        attr = ig.attribute(x_ig, baselines=baseline_native, target=target_day, n_steps=20, internal_batch_size=1)
+        attr = attr.detach().cpu()
+        torch.cuda.empty_cache()
+        print(f"target_day {target_day}, forecast lead time: {(nsteps-3) * 6}h - sum={attr.sum().item():.4e}")
+        
+        attr_stack = attr.numpy().squeeze(0)  # (input_lead_time, node, variable)
+        lead_time_hours = (model.input_coords()["lead_time"] / np.timedelta64(1, "h")).astype(int)
+        node_lat = model.latitudes.detach().flatten().cpu().numpy()
+        node_lon = model.longitudes.detach().flatten().cpu().numpy()
+        var_names = [model.VARIABLES[i] for i in model.input_full_ids.cpu().numpy()]
+
+        ds = xr.Dataset(
+            {"attribution": (["input_lead_time", "node", "variable"], attr_stack)},
+            coords={
+                "input_lead_time": lead_time_hours,
+                "node": np.arange(len(node_lat)),
+                "node_lat": ("node", node_lat),
+                "node_lon": ("node", node_lon),
+                "variable": var_names,
+            },
+            attrs={
+                "description": "Integrated Gradients attribution of AIFS-predicted west Norway "
+                                "precipitation w.r.t. native-grid initial conditions",
+                "target_region": "Vestlandet, Norway",
+                "init_time": init_dt.isoformat(),
+                "target_day": target_dt.date(),
+                "forecast_lead_hours": (nsteps-3) * 6,
+            },
+        )
+        return ds
+
+    finally:
+        shutil.rmtree(tmp_data_cache, ignore_errors=True)
+        print(f"Cleaned up temporary input data cache: {tmp_data_cache}")
