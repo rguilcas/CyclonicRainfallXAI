@@ -6,6 +6,28 @@ from collections import OrderedDict
 import numpy as np
 
 import glob
+import os
+
+
+import xarray as xr
+
+ERA5_CLIMATOLOGY_DIR = "/cluster/projects/nn12107k/robin/era5_climatology"
+
+
+def _align_era5_to_grid(ds, target_lat, target_lon):
+    """Align an ERA5 climatology dataset (lat/lon or latitude/longitude coords,
+    either -180/180 or 0/360 longitude convention) onto the exact lat/lon grid
+    used elsewhere in the pipeline (from coords_cov)."""
+    lat_name = "lat" if "lat" in ds.coords else "latitude"
+    lon_name = "lon" if "lon" in ds.coords else "longitude"
+    ds = ds.rename({lat_name: "lat", lon_name: "lon"})
+    if ds.lon.max() > 180 and target_lon.max() <= 180:
+        ds = ds.assign_coords(lon=((ds.lon + 180) % 360) - 180).sortby("lon")
+    elif ds.lon.max() <= 180 and target_lon.max() > 180:
+        ds = ds.assign_coords(lon=ds.lon % 360).sortby("lon")
+    return ds.interp(lat=target_lat, lon=target_lon, method="nearest")
+
+
 
 def build_climatology_baseline(model, init_dt, device, x_actual, coords_actual):
     ic = model.input_coords()
