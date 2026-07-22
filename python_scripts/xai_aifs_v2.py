@@ -26,7 +26,7 @@ sys.path.append('/cluster/home/rguilcas/code/CyclonicRainfall/CyclonicRainfallXA
 from cyclone_rainfall_module.helpers.aiohttpfix import fix_aiohttp
 from cyclone_rainfall_module.data.climatology import build_climatology_baseline
 from cyclone_rainfall_module.models.wrappers import AIFSPrecipRegionWrapperNativeAllPredictions, build_day_groups
-from cyclone_rainfall_module.attributions.integratedgradients import get_IG_attribution, get_IG_NT_attribution
+from cyclone_rainfall_module.attributions.integratedgradients import get_IG_attribution
 
 fix_aiohttp()  # Patch aiohttp to trust environment variables for proxy settings
 
@@ -58,16 +58,16 @@ def compute_ig_attributions_for_target_day(target_day, max_lead_time_hours, over
     data = ARCO()
 
     for init_dt in list_init_dt:
-        out_file = os.path.join(save_dir, f"ig_nt_attribution_target{target_day}_init{init_dt.strftime('%Y%m%dT%H')}.nc")
+        out_file = os.path.join(save_dir, f"ig_attribution_target{target_day}_init{init_dt.strftime('%Y%m%dT%H')}.nc")
         if out_file and os.path.exists(out_file):
             if overwrite:
                 print(f"Overwriting init {init_dt} (already computed attributions in {out_file})")
             else:
                 print(f"Skipping init {init_dt} (already computed attributions in {out_file})")
                 continue
-        ds_attr = get_IG_NT_attribution(model, init_dt, target_day, data, device, ic)
-        ds_attr.to_netcdf(os.path.join(save_dir, f"ig_nt_attribution_target{target_day}_init{init_dt.strftime('%Y%m%dT%H')}.nc"))
-        print(f"Saved IG NT attribution for init {init_dt} to {save_dir}")
+        ds_attr = get_IG_attribution(model, init_dt, target_day, data, device, ic)
+        ds_attr.to_netcdf(os.path.join(save_dir, f"ig_attribution_target{target_day}_init{init_dt.strftime('%Y%m%dT%H')}.nc"))
+        print(f"Saved IG attribution for init {init_dt} to {save_dir}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

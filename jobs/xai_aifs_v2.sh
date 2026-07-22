@@ -27,4 +27,4 @@ apptainer exec --nv \
     --env no_proxy="${no_proxy:-},s3.amazonaws.com,.s3.amazonaws.com" \
     --env LOGURU_LEVEL=WARNING \
     "${CONTAINER}" \
-    python "${SCRIPT}" --target-day 2016-08-09 --maxleadtime 6 #Can add overwrite flag if you want to recompute attributions for already computed initializations
+    python "${SCRIPT}" --target-day 2019-12-30 --maxleadtime 72 #Can add overwrite flag if you want to recompute attributions for already computed initializations
