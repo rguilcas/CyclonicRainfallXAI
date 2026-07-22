@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=accel
 #SBATCH --gpus=1
-#SBATCH --time=04:00:00
+#SBATCH --time=12:00:00
 #SBATCH --account=nn12107k
 #SBATCH --job-name=xai-aifs
 #SBATCH --mem-per-gpu=128G
@@ -27,4 +27,4 @@ apptainer exec --nv \
     --env no_proxy="${no_proxy:-},s3.amazonaws.com,.s3.amazonaws.com" \
     --env LOGURU_LEVEL=WARNING \
     "${CONTAINER}" \
-    python "${SCRIPT}" --target-day 2016-08-08 --maxleadtime 72 --overwrite #Can add overwrite flag if you want to recompute attributions for already computed initializations
+    python "${SCRIPT}" --target-day 2016-08-09 --maxleadtime 6 #Can add overwrite flag if you want to recompute attributions for already computed initializations

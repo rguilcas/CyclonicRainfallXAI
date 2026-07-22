@@ -1,7 +1,7 @@
 import json
 from shapely.geometry import shape
 from shapely import vectorized  # shapely >= 2.0
-
+import numpy as np
 
 def load_region_mask(geojson_path, region_name, node_lat, node_lon):
     """Boolean mask of native-grid nodes falling inside a named region polygon
