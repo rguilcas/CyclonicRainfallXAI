@@ -81,7 +81,7 @@ def make_prediction(day):
             coords={"lead_hour": lead_hours, "lat": lat[lat_idx], "lon": lon[lon_idx]},
             attrs={"init_time": day, "model": "AIFS"},
         )
-        out_dir = "/cluster/projects/nn12107k/robin/earth2studio/aifs_attributions_vestlandet"
+        out_dir = "/cluster/projects/nn12107k/robin/earth2studio/aifs_prediction_hans"
         os.makedirs(out_dir, exist_ok=True)
         out_path = f"{out_dir}/aifs_precip_west_norway_prediction_{day}.nc"
         ds.to_netcdf(out_path)

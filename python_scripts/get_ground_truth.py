@@ -20,11 +20,11 @@ os.environ["EARTH2STUDIO_DISABLE_MSC"] = "1"
 
 from earth2studio.data import ARCO
 
-lat_bounds = (58.5, 63.0)
-lon_bounds = (4.5, 9.0)
+lat_bounds=(57.8, 63.5)
+lon_bounds=(4.0, 12.5)
 
-start = datetime(2005, 9, 10, 0)
-end = datetime(2005, 9, 16, 18)
+start =  datetime(2023, 7, 30, 00)
+end =  datetime(2023, 8, 15, 18)
 times = []
 t = start
 while t <= end:
@@ -58,9 +58,9 @@ try:
             "units": "m (accumulated over preceding 6h)",
         },
     )
-    out_dir = f"/cluster/projects/nn12107k/robin/earth2studio/aifs_attributions_vestlandet/{target_dt:%Y-%m-%d-%H}".format(target_dt=target_dt)
+    out_dir = f"/cluster/projects/nn12107k/robin/earth2studio/aifs_prediction_hans/"
     os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, "arco_ground_truth_tp06_vestlandet_2005-09-10_to_2005-09-16.nc")
+    out_path = os.path.join(out_dir, "arco_ground_truth_tp06_vestlandet_2023-07-30_to_2023-08-15.nc")
     ds.to_netcdf(out_path)
     print(f"Saved {out_path}")
     print(ds["tp06_region_mean"].to_series())
