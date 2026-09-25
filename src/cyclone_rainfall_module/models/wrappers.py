@@ -37,25 +37,25 @@ class AIFSWrapper(nn.Module):
 
 
         
-    def forward(self, x_native):
-        
-        region_aggs = []
+    def forward(self, x):
         m = self.model
-        step = 0
-        for _ in tqdm(range(self.n_steps), disable=not self.progress_bar):
-            def _step(x_in, coords=self.coords, step=step):
-                out, coords_out = m._forward(x_in,coords, step=step)
+        coords = self.coords.copy()
+        dt = m.output_coords(m.input_coords())["lead_time"]   # the 6h increment
+        region_aggs = []
+
+        for step in tqdm(range(self.n_steps), disable=not self.progress_bar):
+            c_in = coords  # bind current coords explicitly (avoid late-binding closures)
+            def _step(x_in, c_in=c_in, step=step):
+                out, _ = m._forward(x_in, c_in, step=step)
                 return out
-            out = checkpoint(_step, x_native, use_reentrant=False)
-            # print(out.shape)
-            coords = self.coords.copy()
-            coords["lead_time"] = coords["lead_time"] + m.output_coords(m.input_coords())["lead_time"]
-            x_native = m._update_input(out, coords)
-            target_variable_native = out[:, 1, self.node_id, self.target_index].float()
-            region_agg = getattr(torch, self.space_operation)(target_variable_native, dim=-1)
+            out = checkpoint(_step, x, use_reentrant=False)
+
+            coords = coords.copy()
+            coords["lead_time"] = coords["lead_time"] + dt      # advance by 6h each step
+            x = m._update_input(out, coords)
+            x_out = out[:, 1, self.node_id, self.target_index].float()
+            region_agg = getattr(torch, self.space_operation)(x_out, dim=-1)
             region_aggs.append(region_agg)
-            step += 1
-        
         out =  torch.stack(region_aggs, dim=1)  # (batch, n_days)
 
         if self.return_timeseries:
@@ -66,6 +66,68 @@ class AIFSWrapper(nn.Module):
 
 
 
+
+
+# class AIFSWrapper_old(nn.Module):
+#     def __init__(self, 
+#                  model, 
+#                  n_steps, 
+#                  coords, 
+#                  target_var='tp',
+#                  return_timeseries=False,
+#                  node_id=10, 
+#                  space_operation='mean',
+#                  time_operation='sum',
+#                  delta_t_hours=6,
+#                  return_last_n_steps=4,
+#                  progress_bar=True):
+#         super().__init__()
+#         self.model = model
+#         self.coords = coords
+#         self.n_steps = n_steps
+#         self.return_timeseries = return_timeseries
+#         self.node_id = node_id
+#         self.space_operation = space_operation
+#         self.time_operation = time_operation
+#         self.return_last_n_steps = return_last_n_steps
+#         self.delta_t_hours = delta_t_hours
+#         self.progress_bar = progress_bar
+
+#         raw_map = model.model.data_indices.data.output.name_to_index
+#         if target_var not in raw_map:
+#             raise ValueError("Variable name not in AIFS outputs")
+#         self.target_var = target_var
+#         self.target_index = raw_map[target_var]
+
+
+        
+#     def forward(self, x_native):
+        
+#         region_aggs = []
+#         m = self.model
+#         step = 0
+#         for _ in tqdm(range(self.n_steps), disable=not self.progress_bar):
+#             def _step(x_in, coords=self.coords, step=step):
+#                 out, coords_out = m._forward(x_in,coords, step=step)
+#                 return out
+#             out = checkpoint(_step, x_native, use_reentrant=False)
+#             # print(out.shape)
+#             coords = self.coords.copy()
+#             coords["lead_time"] = coords["lead_time"] + m.output_coords(m.input_coords())["lead_time"]
+#             x_native = m._update_input(out, coords)
+#             target_variable_native = out[:, 1, self.node_id, self.target_index].float()
+#             # target_variable_native = out[:, 1, :, self.target_index].float()
+#             # region_agg = getattr(torch, self.space_operation)(target_variable_native, dim=-1)
+#             region_agg = target_variable_native
+#             region_aggs.append(region_agg)
+#             step += 1
+        
+#         out =  torch.stack(region_aggs, dim=1)  # (batch, n_days)
+
+#         if self.return_timeseries:
+#             return out
+#         else:
+#             return getattr(torch, self.time_operation)(out[:,-self.return_last_n_steps:], dim=1)
 
 
 def build_day_groups(init_dt, nsteps, boundary_hour=0):

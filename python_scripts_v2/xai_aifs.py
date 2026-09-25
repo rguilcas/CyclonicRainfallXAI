@@ -56,19 +56,19 @@ def get_region_node_mask(model, region_name, region_geojson_path):
 
 
 
-def build_day_groups(init_dt, nsteps, boundary_hour=0):
-    """Group the model's 6-hourly steps (step k valid at init_dt + k*6h, k=1..nsteps)
-    into fixed calendar-day buckets. boundary_hour=0 -> standard UTC day (00-24 UTC).
-    boundary_hour=6 -> 06-06 UTC "hydrological day". Returns a list of lists of
-    0-indexed step positions (index 0 == first step), matching the order forward()
-    accumulates them in.
-    """
-    valid_times = [init_dt + timedelta(hours=6 * step) for step in range(1, nsteps + 1)]
-    groups = {}
-    for i, vt in enumerate(valid_times):
-        day_key = (vt - timedelta(hours=boundary_hour)).date()
-        groups.setdefault(day_key, []).append(i)
-    return [groups[k] for k in sorted(groups)]
+# def build_day_groups(init_dt, nsteps, boundary_hour=0):
+#     """Group the model's 6-hourly steps (step k valid at init_dt + k*6h, k=1..nsteps)
+#     into fixed calendar-day buckets. boundary_hour=0 -> standard UTC day (00-24 UTC).
+#     boundary_hour=6 -> 06-06 UTC "hydrological day". Returns a list of lists of
+#     0-indexed step positions (index 0 == first step), matching the order forward()
+#     accumulates them in.
+#     """
+#     valid_times = [init_dt + timedelta(hours=6 * step) for step in range(1, nsteps + 1)]
+#     groups = {}
+#     for i, vt in enumerate(valid_times):
+#         day_key = (vt - timedelta(hours=boundary_hour)).date()
+#         groups.setdefault(day_key, []).append(i)
+#     return [groups[k] for k in sorted(groups)]
 
 
 def compute_attributions(model, data,
@@ -123,7 +123,7 @@ def compute_attributions(model, data,
         
         prediction = wrapper(x_native0).detach().cpu().numpy().squeeze(0)
         if predictions_only:
-            return xr.DataArray([prediction], dims=['init_time'], coords={'init_time': [init_time]},name='predictions', attrs={'description': f"AIFS {target_var} prediction for target time {target_time}"})
+            return xr.DataArray([prediction], dims=['init_time'], coords={'init_time': [init_time]},name='predictions', attrs={'description': f"AIFS {target_var} prediction for target time {target_time_start} to {target_time_end}"})
 
         x_clim, coords_clim = build_climatology_baseline(model, init_time, device, x, coords)
         with torch.no_grad():
@@ -136,7 +136,7 @@ def compute_attributions(model, data,
         attr, conv = ig.attribute(x_ig, baselines=baseline_native, n_steps=ig_step, internal_batch_size=ig_internal_batch_size, return_convergence_delta=True)
         attr = attr.detach().cpu()
         torch.cuda.empty_cache()
-        print(f"Target time: {target_time}, prediction time: {init_time} - sum={attr.sum().item():.4e}")
+        print(f"Target time: {target_time_start} to {target_time_end}, prediction time: {init_time} - sum={attr.sum().item():.4e}")
         
         attr_stack = attr.numpy().squeeze(0)  # (input_lead_time, node, variable)
         lead_time_hours = (model.input_coords()["lead_time"] / np.timedelta64(1, "h")).astype(int)
@@ -163,7 +163,8 @@ def compute_attributions(model, data,
                                 "precipitation w.r.t. native-grid initial conditions",
                 "target_region": region_name,
                 "init_time": init_time.isoformat(),
-                "target_time": target_time.isoformat(),
+                "target_time_start": target_time_start.isoformat(),
+                "target_time_end": target_time_end.isoformat(),
             },
         )
         ds['prediction'] = prediction
@@ -190,7 +191,8 @@ def AIFS_XAI_pipeline(region_name,
                       shortest_lead_time_timesteps=1,
                       target_var='tp',
                       time_operation='mean',
-                      overwrite=False, predictions_only=False,
+                      overwrite=False, 
+                      predictions_only=False,
                       ig_step=10,
                       delta_t_hours=6,
                       ):
@@ -202,13 +204,14 @@ def AIFS_XAI_pipeline(region_name,
     data = ARCO()
     native_node_mask = get_region_node_mask(model, region_name, region_geojson_path)
 
-    dir_out = f"/cluster/projects/nn12107k/robin/xai_aifs_v2/{region_name.replace(' ', '_')}__{target_time:%Y%m%dT%H}/"
+    dir_out = f"/cluster/projects/nn12107k/robin/xai_aifs_v2/{region_name.replace(' ', '_')}_{target_var}_target{target_time_start:%Y%m%dT%H}-{target_time_end:%Y%m%dT%H}/"
     os.makedirs(dir_out, exist_ok=True)
     delta_time = target_time_end - target_time_start
     delta_timestep = int(delta_time/timedelta(hours=delta_t_hours))
         
     if predictions_only:
-        file_out = os.path.join(dir_out, f"predictions_{region_name.replace(' ', '_')}_target{target_time:%Y%m%dT%H}.nc")
+        # Compute and save predictions
+        file_out = os.path.join(dir_out, f"predictions_{region_name.replace(' ', '_')}_target{target_time_start:%Y%m%dT%H}-{target_time_end:%Y%m%dT%H}.nc")
         if os.path.exists(file_out) and not overwrite:
                 print(f"Skipping lead time {lead_time} (already computed attributions in {file_out})")
                 return
@@ -226,7 +229,9 @@ def AIFS_XAI_pipeline(region_name,
         print(f"Saved predictions for lead time {longest_lead_time_timesteps}-{shortest_lead_time_timesteps} to {file_out}")
     else:
         for lead_time in range(shortest_lead_time_timesteps, longest_lead_time_timesteps + 1):
-            file_out = os.path.join(dir_out, f"ig_attribution_{region_name.replace(' ', '_')}_target{target_time:%Y%m%dT%H}_lead{lead_time}.nc")
+            if lead_time == 0:
+                continue
+            file_out = os.path.join(dir_out, f"ig_attribution_{region_name.replace(' ', '_')}_target{target_time_start:%Y%m%dT%H}-{target_time_end:%Y%m%dT%H}_lead{lead_time}.nc")
             if os.path.exists(file_out) and not overwrite:
                 print(f"Skipping lead time {lead_time} (already computed attributions in {file_out})")
                 continue
@@ -245,18 +250,18 @@ if __name__=='__main__':
     region_geojson_path = "/cluster/home/rguilcas/code/CyclonicRainfall/CyclonicRainfallXAI/aux/rainfall_regions.geojson"
     region_name = "California heatwave above38 2019-06-11T00"
     target_var = '2t'
-    target_time = datetime(2019, 6, 11, 0, 0)
     target_time_start = datetime(2019, 6, 11, 0, 0)
-    target_time_end = datetime(2019, 6, 11, 18, 0)
-    return_n_times = 4
-    longest_lead_time_timesteps = 12
+    target_time_end = datetime(2019, 6, 11, 0, 0)
+    longest_lead_time_timesteps = 1
     shortest_lead_time_timesteps = 1
     overwrite = False
     predictions_only = False
     ig_step = 30
     time_operation='mean'
     AIFS_XAI_pipeline(region_name, region_geojson_path, 
-                      target_time, longest_lead_time_timesteps, shortest_lead_time_timesteps, 
+                      target_time_start, 
+                      target_time_end,
+                      longest_lead_time_timesteps, shortest_lead_time_timesteps, 
                       target_var=target_var,
                       overwrite=overwrite, 
                       predictions_only=predictions_only,
