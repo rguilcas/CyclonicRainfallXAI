@@ -26,8 +26,8 @@ from earth2studio.data.utils import fetch_data
 from earth2studio.models.px import AIFS
 
 
-init_dt = datetime(2023,1,4, 18)
-nsteps = 3
+init_dt = datetime(2017,1,4, 0)
+nsteps = 20
 
 
 

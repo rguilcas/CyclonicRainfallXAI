@@ -12,7 +12,7 @@ from torch.utils.checkpoint import checkpoint
 from captum.attr import IntegratedGradients
 import contextlib
 import os
-
+import argparse
 
 from earth2studio.data import ARCO
 from earth2studio.data.utils import fetch_data
@@ -75,6 +75,7 @@ def compute_attributions(model, data,
                          native_node_mask,
                          target_time_start, 
                          target_time_end,
+                         region_name,
                          prediction_lead_time_timesteps,
                          delta_t_hours=6, target_var='tp',
                          ig_step=10, ig_internal_batch_size=1,
@@ -92,7 +93,7 @@ def compute_attributions(model, data,
         true_lead_time = prediction_lead_time_timesteps + delta_timestep
         lead_time_hours = timedelta(hours=delta_t_hours*prediction_lead_time_timesteps)
         true_lead_time_hours = timedelta(hours=delta_t_hours*true_lead_time)
-        init_time = target_time_end - lead_time_hours
+        init_time = target_time_end - true_lead_time_hours
         with open(os.devnull, 'w') as fnull:
             with contextlib.redirect_stdout(fnull):
                 x, coords = fetch_data(
@@ -144,7 +145,7 @@ def compute_attributions(model, data,
         node_lon = model.longitudes.detach().flatten().cpu().numpy()
         var_names = [model.VARIABLES[i] for i in model.input_full_ids.cpu().numpy()]
 
-        baseline_prediction = wrapper(baseline_native).detach().cpu().numpy().squeeze(0)[0]
+        baseline_prediction = wrapper(baseline_native).detach().cpu().numpy().squeeze(0)
         # print(f"Prediction for target window [{target_start}, {target_end}]: {prediction}")
         # print(f"Baseline prediction + Sum of attributions: {baseline_prediction + attr_stack.sum():.4e}")
         print(f"Relative completeness error: {100 * (prediction - (baseline_prediction + attr_stack.sum())) / prediction:.2f}%")
@@ -218,8 +219,13 @@ def AIFS_XAI_pipeline(region_name,
         all_predictions = []
 
         for lead_time in range(shortest_lead_time_timesteps, longest_lead_time_timesteps + 1):
-            prediction = compute_attributions(model, data, native_node_mask,
-                                    target_time_start, target_time_end, 
+            prediction = compute_attributions(model, 
+                                    data,
+                                    native_node_mask,
+                                    target_time_start, 
+                                    target_time_end,
+                                    region_name,
+                                    prediction_lead_time_timesteps,
                                     lead_time, predictions_only=True,
                                     target_var=target_var, ig_step=ig_step,
                                     time_operation=time_operation)
@@ -237,6 +243,7 @@ def AIFS_XAI_pipeline(region_name,
                 continue
             ds_attr = compute_attributions(model, data, native_node_mask,
                                         target_time_start, target_time_end, 
+                                        region_name,
                                         lead_time, predictions_only=False,
                                         target_var=target_var, ig_step=ig_step)
             ds_attr.to_netcdf(file_out)
@@ -246,24 +253,98 @@ def AIFS_XAI_pipeline(region_name,
 # coords = OrderedDict([("batch", np.array([0]))] + list(coords.items()))
 
 
-if __name__=='__main__':
-    region_geojson_path = "/cluster/home/rguilcas/code/CyclonicRainfall/CyclonicRainfallXAI/aux/rainfall_regions.geojson"
-    region_name = "California heatwave above38 2019-06-11T00"
-    target_var = '2t'
-    target_time_start = datetime(2019, 6, 11, 0, 0)
-    target_time_end = datetime(2019, 6, 11, 0, 0)
-    longest_lead_time_timesteps = 1
-    shortest_lead_time_timesteps = 1
-    overwrite = False
-    predictions_only = False
-    ig_step = 30
-    time_operation='mean'
-    AIFS_XAI_pipeline(region_name, region_geojson_path, 
-                      target_time_start, 
-                      target_time_end,
-                      longest_lead_time_timesteps, shortest_lead_time_timesteps, 
-                      target_var=target_var,
-                      overwrite=overwrite, 
-                      predictions_only=predictions_only,
-                      ig_step=ig_step,
-                      time_operation=time_operation)
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Run the AIFS XAI pipeline for a region and target time window."
+    )
+    parser.add_argument(
+        "--region-geojson-path",
+        default="/cluster/home/rguilcas/code/CyclonicRainfall/CyclonicRainfallXAI/aux/rainfall_regions.geojson",
+        help="Path to the GeoJSON file containing region definitions.",
+    )
+    parser.add_argument(
+        "--region-name",
+        default="California heatwave above38 2019-06-11T00",
+        help="Name of the region in the GeoJSON file.",
+    )
+    parser.add_argument(
+        "--target-var",
+        default="2t",
+        help="AIFS output variable to target (e.g. 2t, tp).",
+    )
+    parser.add_argument(
+        "--target-time-start",
+        type=datetime.fromisoformat,
+        default=datetime(2019, 6, 11, 0, 0),
+        help="Start of target window, ISO format (e.g. 2019-06-11T00:00).",
+    )
+    parser.add_argument(
+        "--target-time-end",
+        type=datetime.fromisoformat,
+        default=None,
+        help="End of target window, ISO format. Defaults to --target-time-start.",
+    )
+    parser.add_argument(
+        "--longest-lead-time-timesteps",
+        type=int,
+        default=24,
+        help="Longest lead time, in 6-hour model steps.",
+    )
+    parser.add_argument(
+        "--shortest-lead-time-timesteps",
+        type=int,
+        default=1,
+        help="Shortest lead time, in 6-hour model steps.",
+    )
+    parser.add_argument(
+        "--ig-step",
+        type=int,
+        default=30,
+        help="Number of integrated-gradients steps.",
+    )
+    parser.add_argument(
+        "--time-operation",
+        default="mean",
+        choices=["mean", "sum", "max", "min"],
+        help="Aggregation over time steps.",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing outputs.",
+    )
+    parser.add_argument(
+        "--predictions-only",
+        action="store_true",
+        help="Only run predictions, skip attribution.",
+    )
+
+    args = parser.parse_args()
+
+    if args.target_time_end is None:
+        args.target_time_end = args.target_time_start
+    if args.target_time_end < args.target_time_start:
+        parser.error("--target-time-end must be >= --target-time-start")
+    if args.shortest_lead_time_timesteps > args.longest_lead_time_timesteps:
+        parser.error("--shortest-lead-time-timesteps must be <= --longest-lead-time-timesteps")
+
+    return args
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    AIFS_XAI_pipeline(
+        args.region_name,
+        args.region_geojson_path,
+        args.target_time_start,
+        args.target_time_end,
+        args.longest_lead_time_timesteps,
+        args.shortest_lead_time_timesteps,
+        target_var=args.target_var,
+        overwrite=args.overwrite,
+        predictions_only=args.predictions_only,
+        ig_step=args.ig_step,
+        time_operation=args.time_operation,
+    )
+
