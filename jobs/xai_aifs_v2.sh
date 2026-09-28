@@ -3,7 +3,7 @@
 #SBATCH --gpus=1
 #SBATCH --time=12:00:00
 #SBATCH --account=nn12107k
-#SBATCH --job-name=xai-aifs
+#SBATCH --job-name=2021-06-18-xai-aifs
 #SBATCH --mem-per-gpu=128G
 #SBATCH --exclude=gpu-1-111
 #SBATCH --output=logs/%x_%A.out
@@ -30,11 +30,10 @@ apptainer exec --nv \
     python "${SCRIPT}"\
             --region-name "California heatwave above38 2019-06-11T00"\
             --target-vars 2t \
-            --target-time-start 2019-06-11T00:00 \
-            --target-time-end 2019-06-11T18:00 \
-            --lead-times 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18\
-            --time-operation sum \
-        #     --overwrite \
-            --latlon
-
-            #--overwrite
+            --target-time-start 2021-06-18T00:00 \
+            --target-time-end 2021-06-18T18:00 \
+            --lead-times 1 2 3 4 5 6 7 8 9 13 17 21 25 29 33 \
+            --ig-steps 30
+            --time-operation mean \
+        #     --overwrite
+            
