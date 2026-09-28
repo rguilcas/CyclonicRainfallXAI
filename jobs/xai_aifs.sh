@@ -14,7 +14,7 @@ mkdir -p logs
 
 CONTAINER="/cluster/projects/nn12107k/robin/apptainer/earth2studio_v2.sif"
 BINDDIRS="/cluster/home/rguilcas,/cluster/projects/nn12107k/"
-SCRIPT="/cluster/home/rguilcas/code/CyclonicRainfall/CyclonicRainfallXAI/python_scripts_v3/xai_aifs.py"
+SCRIPT="/cluster/home/rguilcas/code/AIFS-XAI/scripts/xai_aifs.py"
 
 apptainer exec --nv \
             --bind "${BINDDIRS}" \
@@ -32,8 +32,8 @@ apptainer exec --nv \
             --target-vars 2t \
             --target-time-start 2021-06-18T00:00 \
             --target-time-end 2021-06-18T18:00 \
-            --lead-times 1 2 3 4 5 6 7 8 9 13 17 21 25 29 33 \
+            --lead-times 1 \
             --ig-steps 30
-            --time-operation mean \
+            --time-operation mean
         #     --overwrite
             
