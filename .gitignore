@@ -1,2 +1,5 @@
 jobs/logs/
-**.pyc
+logs/
+__pycache__/
+*.pyc
+*.egg-info/

@@ -1,37 +1,37 @@
-import torch.nn as nn
 import torch
-from datetime import timedelta
+import torch.nn as nn
 from torch.utils.checkpoint import checkpoint
-from tqdm import tqdm
+
+from xai_aifs_module.config import default_scale
+
+REDUCTIONS = ("mean", "sum", "max", "min")
 
 
-# 6-hourly accumulations are in metres; attribute them in mm (x1000) so that
-# gradients stay well inside fp16 range under the model's autocast.
-ACCUMULATED_VARS = {"tp", "cp", "sf", "ro"}
-RADIATION_VARS = {"ssrd", "strd"}
-
-def default_scale(var):
-    if var in ACCUMULATED_VARS:
-        return 1000.0, "mm"
-    if var in RADIATION_VARS:
-        return 1e-6, "MJ m-2"
-    return 1.0, "native"
+def _reduce(x, op, dim):
+    """torch.<op> along `dim`, returning values only (max/min return a tuple)."""
+    if op not in REDUCTIONS:
+        raise ValueError(f"Unknown reduction {op!r}; choose from {REDUCTIONS}")
+    out = getattr(torch, op)(x, dim=dim)
+    return out.values if op in ("max", "min") else out
 
 
-# ----------------------------------------------------------------------------
-# Model wrapper: initial state -> region/window aggregate for several variables
-# ----------------------------------------------------------------------------
 class AIFSRegionTarget(nn.Module):
-    """Rolls AIFS out for n_steps and returns, for each target variable, the
+    """Rolls AIFS out for ``n_steps`` and returns, for each target variable, the
     space- and time-aggregated value over the region nodes and window steps.
 
     Step i (0-based) of the rollout is valid at init + (i + 1) * 6 h.
-    Output shape: (batch, n_targets), in scaled units (see default_scale).
+    Output shape: (batch, n_targets), in scaled units (see config.default_scale).
     """
 
     def __init__(self, model, coords, n_steps, window_steps, node_idx, target_vars,
                  time_operation="sum", space_operation="mean", use_checkpoint=True):
         super().__init__()
+        for op in (time_operation, space_operation):
+            if op not in REDUCTIONS:
+                raise ValueError(f"Unknown reduction {op!r}; choose from {REDUCTIONS}")
+        if not window_steps or max(window_steps) >= n_steps:
+            raise ValueError(f"window_steps {window_steps} must be non-empty and < n_steps={n_steps}")
+
         self.model = model
         self.coords = coords
         self.n_steps = n_steps
@@ -45,10 +45,12 @@ class AIFSRegionTarget(nn.Module):
         if missing:
             raise ValueError(f"Not AIFS outputs: {missing}. Available: {sorted(name_to_index)}")
         self.target_vars = list(target_vars)
+
         dev = next(model.parameters()).device
         self.target_idx = torch.tensor([name_to_index[v] for v in target_vars], device=dev)
         self.node_idx = torch.as_tensor(node_idx, dtype=torch.long, device=dev)
-        self.scale = torch.tensor([default_scale(v)[0] for v in target_vars], device=dev)
+        self.scale = torch.tensor([default_scale(v)[0] for v in target_vars],
+                                  dtype=torch.float32, device=dev)
         self.dt = model.output_coords(model.input_coords())["lead_time"]
 
     def _step(self, x, coords, step):
@@ -65,8 +67,9 @@ class AIFSRegionTarget(nn.Module):
                 out = self._step(x, coords, i + 1)
 
             if i in self.window_steps:
+                # out[:, 1] is the newest time level of the output state
                 vals = out[:, 1][:, self.node_idx][:, :, self.target_idx].float()  # (B, nodes, T)
-                per_step.append(getattr(torch, self.space_operation)(vals, dim=1))  # (B, T)
+                per_step.append(_reduce(vals, self.space_operation, dim=1))       # (B, T)
 
             if i < self.n_steps - 1:
                 coords = coords.copy()
@@ -74,7 +77,4 @@ class AIFSRegionTarget(nn.Module):
                 x = self.model._update_input(out, coords)
 
         series = torch.stack(per_step, dim=1)  # (B, n_window, T)
-        agg = getattr(torch, self.time_operation)(series, dim=1)
-        if isinstance(agg, tuple):  # torch.max / torch.min return (values, indices)
-            agg = agg[0]
-        return agg * self.scale
+        return _reduce(series, self.time_operation, dim=1) * self.scale

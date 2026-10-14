@@ -1,8 +1,9 @@
 import json
-from shapely.geometry import shape
-from shapely import vectorized  # shapely >= 2.0
+
 import numpy as np
 import torch
+from shapely import contains_xy
+from shapely.geometry import shape
 
 
 def native_to_latlon_attribution(model, integrated_grad, x_ll, b_ll, chunk=32):
@@ -16,15 +17,15 @@ def native_to_latlon_attribution(model, integrated_grad, x_ll, b_ll, chunk=32):
     Only prognostic input variables live on the lat-lon grid; forcings and
     invariants are generated internally and have zero attribution anyway.
 
-    integrated_grad: (T, 2, N_native, C_in)   x_ll, b_ll: (1, 1, 2, V, nlat, nlon)
-    Returns: (T, 2, V, nlat, nlon) float32 tensor.
+    integrated_grad: (T, L, N_native, C_in)   x_ll, b_ll: (1, 1, L, V, nlat, nlon)
+    Returns: (T, L, V, nlat, nlon) float32 tensor.
     """
     M = model.interpolation_matrix
     Mt = (M.to_sparse_coo() if M.is_sparse else M.to_sparse()).t().coalesce()
 
     input_full = model.input_full_ids.cpu().numpy()
     prognostic = model.input_ids.cpu().numpy()
-    chan = [int(np.where(input_full == pid)[0][0]) for pid in prognostic]
+    chan = [int(np.flatnonzero(input_full == pid)[0]) for pid in prognostic]
 
     g = integrated_grad[..., chan]  # (T, L, N, V)
     T, L, N, V = g.shape
@@ -41,52 +42,26 @@ def native_to_latlon_attribution(model, integrated_grad, x_ll, b_ll, chunk=32):
     return out * diff.unsqueeze(0)
 
 
-
-def get_lat_band_node_mask(nodes_lat, target_lat, lat_half_width):
-    """Boolean mask of native-grid nodes falling within a latitudinal band."""
-    lat_min = target_lat - lat_half_width
-    lat_max = target_lat + lat_half_width
-    test = (nodes_lat >= lat_min) & (nodes_lat <= lat_max)
-    return np.where(test)[0]
-
-def get_lon_band_node_mask(nodes_lon, target_lon, lon_half_width):
-    """Boolean mask of native-grid nodes falling within a longitudinal band."""
-    lon_min = target_lon - lon_half_width
-    lon_max = target_lon + lon_half_width
-    test = (nodes_lon >= lon_min) & (nodes_lon <= lon_max)
-    return np.where(test)[0]
-
-def get_lon_lat_box_node_mask(nodes_lon, nodes_lat, target_lon, target_lat, lon_half_width, lat_half_width):
-    """Boolean mask of native-grid nodes falling within a lon-lat box."""
-    lat_mask = get_lat_band_node_mask(nodes_lat, target_lat, lat_half_width)
-    lon_mask = get_lon_band_node_mask(nodes_lon, target_lon, lon_half_width)
-    combined_mask = np.intersect1d(lat_mask, lon_mask)
-    return combined_mask
+def box_node_indices(node_lon, node_lat, lon_range=None, lat_range=None):
+    """Indices of nodes inside a lon/lat box. Ranges are (min, max), inclusive; None = unbounded."""
+    inside = np.ones_like(node_lat, dtype=bool)
+    if lat_range is not None:
+        inside &= (node_lat >= lat_range[0]) & (node_lat <= lat_range[1])
+    if lon_range is not None:
+        inside &= (node_lon >= lon_range[0]) & (node_lon <= lon_range[1])
+    return np.flatnonzero(inside)
 
 
-def load_region_mask(geojson_path, region_name, node_lat, node_lon):
-    """Boolean mask of native-grid nodes falling inside a named region polygon
-    from a geojson file (e.g. aux/rainfall_regions.geojson)."""
+def region_node_indices(geojson_path, region_name, node_lat, node_lon):
+    """Indices of nodes inside a named polygon of a geojson file
+    (matched on the feature's ``properties.index``)."""
     with open(geojson_path) as f:
-        gj = json.load(f)
-
-    feature = next(
-        (feat for feat in gj["features"] if feat["properties"]["index"] == region_name), None
-    )
+        features = json.load(f)["features"]
+    feature = next((ft for ft in features if ft["properties"]["index"] == region_name), None)
     if feature is None:
-        raise ValueError(f"No region named {region_name!r} found in {geojson_path}")
+        names = [ft["properties"]["index"] for ft in features]
+        raise ValueError(f"No region {region_name!r} in {geojson_path}. Available: {names}")
     polygon = shape(feature["geometry"])
 
-    node_lon_180 = ((node_lon + 180) % 360) - 180  # match geojson's -180/180 convention
-    inside = vectorized.contains(polygon, node_lon_180, node_lat)
-    return np.where(inside)[0]
-
-
-def region_nodes(model, region_name, geojson):
-    lat = model.latitudes.detach().flatten().cpu().numpy()
-    lon = model.longitudes.detach().flatten().cpu().numpy()
-    idx = load_region_mask(geojson, region_name, lat, lon)
-    if len(idx) == 0:
-        raise ValueError(f"Region {region_name!r} contains no AIFS grid nodes")
-    print(f"{region_name}: {len(idx)} of {len(lat)} native nodes")
-    return idx
+    node_lon_180 = ((node_lon + 180) % 360) - 180  # geojson uses -180/180
+    return np.flatnonzero(contains_xy(polygon, node_lon_180, node_lat))

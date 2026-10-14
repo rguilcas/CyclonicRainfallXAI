@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xai-aifs-module"
+version = "0.1.0"
+description = "Integrated-Gradients attribution of AIFS forecasts over a region and time window"
+requires-python = ">=3.10"
+dependencies = [
+    "earth2studio",
+    "torch",
+    "numpy",
+    "pandas",
+    "xarray",
+    "netCDF4",
+    "shapely>=2.0",
+    "aiohttp",
+    "tqdm",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
