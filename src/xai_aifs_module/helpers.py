@@ -57,9 +57,11 @@ def era5_source(keep_cache=False, stale_tmp_hours=24):
     from earth2studio.data import ARCO
     from earth2studio.data.utils import datasource_cache_root
 
-    root = Path(datasource_cache_root()) / "arco_era5"
+    cache_root = Path(datasource_cache_root())
+    # Temporary folder name differs between earth2studio versions.
+    tmp_dirs = [*(cache_root / "arco_era5").glob("tmp_arco*"), *(cache_root / "arco").glob("tmp_arco*")]
     cutoff = time.time() - stale_tmp_hours * 3600
-    for tmp in root.glob("tmp_arco_era5_*"):
+    for tmp in tmp_dirs:
         try:
             if tmp.stat().st_mtime < cutoff:
                 shutil.rmtree(tmp, ignore_errors=True)
