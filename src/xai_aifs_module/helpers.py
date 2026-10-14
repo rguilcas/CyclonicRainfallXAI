@@ -1,6 +1,6 @@
 import aiohttp
 import torch
-
+import contextlib
 def fix_aiohttp():
     """
     Patch aiohttp to trust environment variables for proxy settings.

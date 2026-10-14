@@ -2,6 +2,7 @@ import json
 from shapely.geometry import shape
 from shapely import vectorized  # shapely >= 2.0
 import numpy as np
+import torch
 
 
 def native_to_latlon_attribution(model, integrated_grad, x_ll, b_ll, chunk=32):
@@ -80,3 +81,12 @@ def load_region_mask(geojson_path, region_name, node_lat, node_lon):
     inside = vectorized.contains(polygon, node_lon_180, node_lat)
     return np.where(inside)[0]
 
+
+def region_nodes(model, region_name, geojson):
+    lat = model.latitudes.detach().flatten().cpu().numpy()
+    lon = model.longitudes.detach().flatten().cpu().numpy()
+    idx = load_region_mask(geojson, region_name, lat, lon)
+    if len(idx) == 0:
+        raise ValueError(f"Region {region_name!r} contains no AIFS grid nodes")
+    print(f"{region_name}: {len(idx)} of {len(lat)} native nodes")
+    return idx

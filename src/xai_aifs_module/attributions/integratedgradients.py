@@ -6,7 +6,7 @@ from tqdm import tqdm
 # ----------------------------------------------------------------------------
 # Integrated Gradients (Gauss-Legendre, batched path, several targets per forward)
 # ----------------------------------------------------------------------------
-def integrated_gradients(f, x, baseline, n_points=16, batch_size=1, log=True):
+def integrated_gradients(f, x, baseline, n_points=16, batch_size=1, log=True, grad_scale=100.0):
     """Returns (attributions, integrated_gradients), both of shape
     (n_targets, *x.shape[1:]). x and baseline have shape (1, ...).
     attributions = (x - baseline) * integrated_gradients."""
@@ -22,7 +22,7 @@ def integrated_gradients(f, x, baseline, n_points=16, batch_size=1, log=True):
             a = alphas[start:start + batch_size].view(bshape)
             w = weights[start:start + batch_size].view(bshape)
             xa = (baseline.detach() + a * diff).requires_grad_(True)
-            out = f(xa)  # (k, T)
+            out = f(xa) * grad_scale   # (k, T)
             n_targets = out.shape[1]
             if grad_sum is None:
                 grad_sum = torch.zeros((n_targets, *x.shape[1:]), dtype=torch.float32, device=x.device)
@@ -31,4 +31,7 @@ def integrated_gradients(f, x, baseline, n_points=16, batch_size=1, log=True):
                 grad_sum[t] += (g.float() * w).sum(dim=0)
             del out, xa
             bar.update(len(range(start, min(start + batch_size, n_points))))
+    if not torch.isfinite(grad_sum).all():
+        raise FloatingPointError("Non-finite gradients: lower --grad-scale")
+    grad_sum = grad_sum / grad_scale
     return grad_sum * diff[0].float(), grad_sum

@@ -29,14 +29,16 @@ from earth2studio.data import ARCO
 from earth2studio.data.utils import fetch_data
 from earth2studio.models.px import AIFS
 
+
 BASE_DIR = "/cluster/home/rguilcas/code/AIFS-XAI"
 sys.path.append(f"{BASE_DIR}/src")
 
-from xai_aifs.data.climatology import build_climatology_baseline
+from xai_aifs_module.data.climatology import build_climatology_baseline
+from xai_aifs_module.models.wrappers import AIFSRegionTarget, default_scale, ACCUMULATED_VARS, RADIATION_VARS
+from xai_aifs_module.helpers import grad_through_no_grad, fix_aiohttp
+from xai_aifs_module.data.grids import native_to_latlon_attribution,region_nodes
+from xai_aifs_module.attributions.integratedgradients import integrated_gradients
 
-from xai_aifs.model.wrappers import AIFSRegionTarget
-from xai_aifs.helpers import grad_through_no_grad, fix_aiohttp
-from xai_aifs.data.grids import native_to_latlon_attribution
 
 fix_aiohttp()  # proxy settings for ARCO / model weights on Olivia
 
@@ -45,19 +47,62 @@ STEP_HOURS = 6
 OUT_ROOT = "/cluster/projects/nn12107k/robin/xai_aifs_v3"
 DEFAULT_REGION_GEOJSON = f"{BASE_DIR}/aux/rainfall_regions.geojson"
 
-# 6-hourly accumulations are in metres; attribute them in mm (x1000) so that
-# gradients stay well inside fp16 range under the model's autocast.
-ACCUMULATED_VARS = {"tp", "cp", "sf", "ro"}
-RADIATION_VARS = {"ssrd", "strd"}
 
+# ----------------------------------------------------------------------------
+# Inputs
+# ----------------------------------------------------------------------------
+def load_inputs(model, data, init_time):
+    ic = model.input_coords()
+    x, coords = fetch_data(source=data, time=[init_time], variable=ic["variable"],
+                           lead_time=ic["lead_time"], device=device)
+    x_clim, coords_clim = build_climatology_baseline(model, init_time, device, x, coords)
+    x = x.unsqueeze(0)
+    with torch.no_grad():
+        x_native = model._prepare_input(x, coords)
+        b_native = model._prepare_input(x_clim, coords_clim)
 
-def default_scale(var):
-    if var in ACCUMULATED_VARS:
-        return 1000.0, "mm"
-    if var in RADIATION_VARS:
-        return 1e-6, "MJ m-2"
-    return 1.0, "native"
+    # Sanity check: forcing and invariant channels should be identical in input and
+    # baseline, so their attributions are exactly zero.
+    same = ((x_native - b_native).abs().amax(dim=(0, 1, 2)) == 0).cpu().numpy()
+    var_names = [model.VARIABLES[i] for i in model.input_full_ids.cpu().numpy()]
+    print(f"  Channels identical in input and baseline: {[v for v, s in zip(var_names, same) if s]}")
+    return x_native.detach(), b_native.detach(), coords, x, x_clim
 
+# ----------------------------------------------------------------------------
+# Outputs
+# ----------------------------------------------------------------------------
+def shrink_attribution(ds, sum_lead=True, coarsen=None, mass=0.99, crop_box=False, pad_deg=5):
+    a = ds["attribution"]
+    if sum_lead:
+        ds["share_attributions_at_time_t0"] = abs(a.isel(input_lead_time=-1)).sum(["variable", "lat", "lon"]) / abs(a).sum(["input_lead_time", "variable", "lat", "lon"])
+        a = a.sum("input_lead_time")
+    # if coarsen:  # e.g. 4 -> 1 deg; sum keeps completeness
+    #     a = a.coarsen(lat=coarsen, lon=coarsen, boundary="pad").sum()
+
+    # one mask from |attr| summed over everything except space
+    other = [d for d in a.dims if d not in ("lat", "lon")]
+    mag = abs(a).sum(other)
+    v = np.sort(mag.values.ravel())[::-1]
+    cum = np.cumsum(v) / v.sum()
+    thr = v[min(np.searchsorted(cum, mass), len(v) - 1)]
+    mask = mag >= thr
+    a = a.where(mask, 0.0)
+
+    if crop_box:  # optional; assumes the signal doesn't straddle the lon seam
+        lat_ok = mask.any("lon"); lon_ok = mask.any("lat")
+        lats = a.lat[lat_ok]; lons = a.lon[lon_ok]
+        a = a.sel(lat=slice(float(lats.max()) + pad_deg, float(lats.min()) - pad_deg)
+                  if a.lat[0] > a.lat[-1] else
+                  slice(float(lats.min()) - pad_deg, float(lats.max()) + pad_deg),
+                  lon=slice(float(lons.min()) - pad_deg, float(lons.max()) + pad_deg))
+
+    ds = ds.drop_vars("attribution").drop_dims([d for d in ("input_lead_time",) if sum_lead], errors="ignore")
+    ds["attribution"] = a.astype(np.float32)
+    # keep track of what the masking threw away (sum over space+variable per target)
+    ds["attribution_sum_kept"] = a.sum([d for d in a.dims if d != "target"])
+    ds.attrs.update(mask_mass_fraction=mass, coarsen_factor=coarsen or 1,
+                    summed_input_lead_time=int(sum_lead))
+    return ds
 
 
 # ----------------------------------------------------------------------------
@@ -118,7 +163,7 @@ def run(args):
 
         with grad_through_no_grad():
             attr, igrad = integrated_gradients(f, x_native, b_native, n_points=args.ig_steps,
-                                               batch_size=args.ig_batch_size)
+                                               batch_size=args.ig_batch_size, grad_scale=args.grad_scale)
 
         # Only the per-target sums of the native attributions are kept (for the check).
         attr_sum_native = attr.flatten(1).double().sum(dim=1).cpu().numpy()  # (T,)
@@ -175,7 +220,12 @@ def run(args):
                         "are not on the lat-lon grid (their attribution is zero).",
             },
         )
-        ds.to_netcdf(file_out, encoding={"attribution": {"zlib": True, "complevel": 1}})
+        ds = shrink_attribution(ds, sum_lead=True, coarsen=4, mass=0.99)
+        enc = {"attribution": {"zlib": True,
+                               "complevel": 4, 
+                               "shuffle": True,
+                               "significant_digits": 3}}   # quantization, needs netCDF4 >= 1.6
+        ds.to_netcdf(file_out, encoding=enc)
         print(f"  saved {file_out}  ({time.time() - t0:.0f} s for this lead)")
         del attr_ll, ds
 
@@ -191,6 +241,7 @@ def run(args):
                    "target_time_start": args.target_time_start.isoformat(),
                    "target_time_end": args.target_time_end.isoformat()},
         )
+        
         ds.to_netcdf(file_out)
         print(f"Saved predictions to {file_out}")
 
@@ -214,6 +265,7 @@ def parse_args():
     p.add_argument("--time-operation", default="sum", choices=["mean", "sum", "max", "min"])
     p.add_argument("--overwrite", action="store_true")
     p.add_argument("--predictions-only", action="store_true")
+    p.add_argument("--grad-scale", type=float, default=1.0, help="Scale factor for gradients.")
     args = p.parse_args()
 
     if args.target_time_end is None:

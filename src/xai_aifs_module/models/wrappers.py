@@ -5,6 +5,19 @@ from torch.utils.checkpoint import checkpoint
 from tqdm import tqdm
 
 
+# 6-hourly accumulations are in metres; attribute them in mm (x1000) so that
+# gradients stay well inside fp16 range under the model's autocast.
+ACCUMULATED_VARS = {"tp", "cp", "sf", "ro"}
+RADIATION_VARS = {"ssrd", "strd"}
+
+def default_scale(var):
+    if var in ACCUMULATED_VARS:
+        return 1000.0, "mm"
+    if var in RADIATION_VARS:
+        return 1e-6, "MJ m-2"
+    return 1.0, "native"
+
+
 # ----------------------------------------------------------------------------
 # Model wrapper: initial state -> region/window aggregate for several variables
 # ----------------------------------------------------------------------------
