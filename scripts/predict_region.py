@@ -34,13 +34,12 @@ config.set_earth2studio_env()  # must happen before earth2studio is imported
 
 import torch  # noqa: E402
 import xarray as xr  # noqa: E402
-from earth2studio.data import ARCO  # noqa: E402
 from earth2studio.data.utils import fetch_data  # noqa: E402
 from earth2studio.models.px import AIFS  # noqa: E402
 
 from xai_aifs_module.data.inputs import region_nodes  # noqa: E402
 from xai_aifs_module.data.truth import era5_region_series  # noqa: E402
-from xai_aifs_module.helpers import fix_aiohttp  # noqa: E402
+from xai_aifs_module.helpers import era5_source, fix_aiohttp  # noqa: E402
 from xai_aifs_module.models.rollout import batched_region_rollout  # noqa: E402
 from xai_aifs_module.models.wrappers import _reduce  # noqa: E402
 
@@ -102,7 +101,7 @@ def run(args):
     file_out.parent.mkdir(parents=True, exist_ok=True)
 
     model = AIFS.load_model(AIFS.load_default_package()).to(device).eval()
-    data = ARCO()
+    data = era5_source(keep_cache=args.keep_era5_cache)
     node_idx = region_nodes(model, args.region_name, args.region_geojson_path)
     scale = torch.tensor([config.default_scale(v)[0] for v in args.target_vars])
 
@@ -173,6 +172,8 @@ def parse_args(argv=None):
                    help="Init times run together per forward pass (lower if GPU memory runs out).")
     p.add_argument("--time-operation", default="sum", choices=REDUCTIONS)
     p.add_argument("--space-operation", default="mean", choices=REDUCTIONS)
+    p.add_argument("--keep-era5-cache", action="store_true",
+                   help="Keep downloaded ERA5 fields on disk (by default they are deleted after use).")
     p.add_argument("--out-root", default=str(config.OUT_ROOT))
     p.add_argument("--overwrite", action="store_true")
     args = p.parse_args(argv)

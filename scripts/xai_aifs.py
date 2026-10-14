@@ -26,13 +26,12 @@ config.set_earth2studio_env()  # must happen before earth2studio is imported
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
 import xarray as xr  # noqa: E402
-from earth2studio.data import ARCO  # noqa: E402
 from earth2studio.models.px import AIFS  # noqa: E402
 
 from xai_aifs_module.attributions.integratedgradients import integrated_gradients  # noqa: E402
 from xai_aifs_module.data.grids import native_to_latlon_attribution  # noqa: E402
 from xai_aifs_module.data.inputs import load_inputs, region_nodes  # noqa: E402
-from xai_aifs_module.helpers import fix_aiohttp, grad_through_no_grad  # noqa: E402
+from xai_aifs_module.helpers import era5_source, fix_aiohttp, grad_through_no_grad  # noqa: E402
 from xai_aifs_module.models.wrappers import AIFSRegionTarget  # noqa: E402
 from xai_aifs_module.outputs import shrink_attribution  # noqa: E402
 
@@ -194,7 +193,7 @@ def run(args):
     dir_out.mkdir(parents=True, exist_ok=True)
 
     model = AIFS.load_model(AIFS.load_default_package()).to(device).eval()
-    data = ARCO()
+    data = era5_source(keep_cache=args.keep_era5_cache)
     node_idx = region_nodes(model, args.region_name, args.region_geojson_path)
 
     predictions = []
@@ -254,6 +253,8 @@ def parse_args(argv=None):
                    help="Crop the saved field to the box around the kept points.")
     p.add_argument("--full-output", action="store_true",
                    help="Save the raw attribution field without any masking or summing.")
+    p.add_argument("--keep-era5-cache", action="store_true",
+                   help="Keep downloaded ERA5 fields on disk (by default they are deleted after use).")
     p.add_argument("--out-root", default=str(config.OUT_ROOT))
     p.add_argument("--overwrite", action="store_true")
     p.add_argument("--predictions-only", action="store_true",
